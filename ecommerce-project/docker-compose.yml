@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+
+  user-service:
+    build:
+      context: ./../user-service
+      dockerfile: ./../user-service/user-service.dockerfile
+    restart: always
+    ports:
+      - "8080:8080"
+    deploy:
+      mode: replicated
+      replicas: 1
+
+
+
+  mongo:
+    image: "mongo:4.2.17-bionic"
+    ports:
+      - "64001:27017"
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      MONGO_INITDB_DATABASE: "users"
+      MONGO_INITDB_ROOT_USERNAME: "admin"
+      MONGO_INITDB_ROOT_PASSWORD: "password"
+    volumes:
+      - ./db-data/mongo/:/data/db
