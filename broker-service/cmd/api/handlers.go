@@ -8,11 +8,10 @@ import (
 
 type RequestPayload struct {
 	Action string      `json:"action"`
-	User   UserPayload `json:"users,omitempty"`
+	User   UserPayload `json:"user,omitempty"`
 }
 
 type UserPayload struct {
-	ID       string `json:"id"`
 	Name     string `json:"name"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
@@ -47,11 +46,11 @@ func (app *Config) HandleSubmission(w http.ResponseWriter, r *http.Request) {
 func (app *Config) handleUserRequest(w http.ResponseWriter, user UserPayload) {
 	jsonData, _ := json.MarshalIndent(user, "", "\t")
 
-	userServiceURL := "http://user-service:/user"
+	userServiceURL := "http://user-service/user"
 
 	request, err := http.NewRequest("POST", userServiceURL, bytes.NewBuffer(jsonData))
 	if err != nil {
-		app.errorJSON(w, err)
+		app.errorJSON(w, err, http.StatusInternalServerError)
 		return
 	}
 
@@ -60,12 +59,12 @@ func (app *Config) handleUserRequest(w http.ResponseWriter, user UserPayload) {
 	client := &http.Client{}
 	response, err := client.Do(request)
 	if err != nil {
-		app.errorJSON(w, err)
+		app.errorJSON(w, err, http.StatusInternalServerError)
 		return
 	}
 	defer response.Body.Close()
 
-	if response.StatusCode != http.StatusOK {
+	if response.StatusCode != http.StatusCreated {
 		app.errorJSON(w, err)
 		return
 	}
@@ -74,5 +73,5 @@ func (app *Config) handleUserRequest(w http.ResponseWriter, user UserPayload) {
 	payload.Error = false
 	payload.Message = "User created successfully"
 
-	app.writeJSON(w, http.StatusOK, payload)
+	app.writeJSON(w, http.StatusCreated, payload)
 }

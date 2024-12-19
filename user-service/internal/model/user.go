@@ -21,7 +21,7 @@ type User struct {
 	ID       string `bson:"_id,omitempty" json:"id,omitempty"`
 	Name     string `bson:"name" json:"name"`
 	Email    string `bson:"email" json:"email"`
-	Password string `bson:"password,omitempty" json:"-"`
+	Password string `bson:"password,omitempty" json:""`
 }
 
 func New(mongo *mongo.Client) Models {
@@ -31,9 +31,9 @@ func New(mongo *mongo.Client) Models {
 	}
 }
 
-func (u *User) CreateUser(ctx context.Context, user User) error {
+func (u *User) CreateUser(user User) error {
 	collection := client.Database("users").Collection("users")
-	_, err := collection.InsertOne(ctx, User{
+	_, err := collection.InsertOne(context.TODO(), User{
 		Name:     user.Name,
 		Email:    user.Email,
 		Password: user.Password,

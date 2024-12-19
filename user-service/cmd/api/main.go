@@ -1,14 +1,20 @@
 package main
 
 import (
-	"context"
+	"fmt"
 	"log"
-	"os"
-	"os/signal"
-	"syscall"
+	"net/http"
 	"user-service/internal/model"
 	"user-service/pkg/db"
 )
+
+const (
+	webPort = "80"
+)
+
+type Config struct {
+	Models model.Models
+}
 
 func main() {
 	// Connect to MongoDB and get the client
@@ -16,37 +22,29 @@ func main() {
 	if err != nil {
 		log.Panic("MongoDB connection failed:", err)
 	}
-	defer db.DisconnectMongo()
+	defer db.DisconnectMongo() // Close the connection when the main function exits
 
-	// Create a new instance of the User struct
-	user := model.New(client)
-
-	// Insert a new user
-	ctx := context.Background()
-	err = user.User.CreateUser(ctx, model.User{
-		Name:     "John Doe",
-		Email:    "john.doe@example.com",
-		Password: "password",
-	})
-	if err != nil {
-		log.Panic("Error while inserting user:", err)
-	} else {
-		log.Println("User inserted successfully")
+	app := Config{
+		Models: model.New(client),
 	}
 
-	// Get the user
-	retrievedUser, err := user.User.GetUser("67633675597d2a429d5043e4")
-	if err != nil {
-		log.Panic("Error while getting user:", err)
-	} else {
-		log.Printf("User retrieved: %+v\n", retrievedUser)
+	log.Printf("Starting the application on port %s\n", webPort)
+	srv := &http.Server{
+		Addr:    fmt.Sprintf(":%s", webPort),
+		Handler: app.routes(),
 	}
 
-	// Wait for application shutdown signal
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
-	<-quit
-	log.Println("Shutting down the application...")
+	err = srv.ListenAndServe()
+	if err != nil {
+		log.Panic("Error while starting the user server:", err)
+	}
+	// // Get the user
+	// retrievedUser, err := user.User.GetUser("67633675597d2a429d5043e4")
+	// if err != nil {
+	// 	log.Panic("Error while getting user:", err)
+	// } else {
+	// 	log.Printf("User retrieved: %+v\n", retrievedUser)
+	// }
 }
 
 /*
