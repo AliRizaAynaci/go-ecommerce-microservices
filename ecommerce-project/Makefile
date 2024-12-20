@@ -33,3 +33,5 @@ build_broker:
 	@echo Building broker binary...
 	chdir ..\broker-service && set GOOS=linux&& set GOARCH=amd64&& set CGO_ENABLED=0 && go build -o ${BROKER_BINARY} ./cmd/api
 	@echo Done!
+
+restart: down up_build
