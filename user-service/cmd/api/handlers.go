@@ -36,9 +36,18 @@ func (app *Config) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// get user id
+	createdUser, err := app.Models.User.GetUserByEmail(user.Email)
+	if err != nil {
+		app.errorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+	userID := createdUser.ID
+
 	resp := JsonResponse{
 		Error:   false,
 		Message: "User created successfully",
+		Data:    userID,
 	}
 
 	app.writeJSON(w, http.StatusCreated, resp)

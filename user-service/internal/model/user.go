@@ -18,7 +18,7 @@ type Models struct {
 }
 
 type User struct {
-	ID       int    `bson:"_id,omitempty" json:"id,omitempty"`
+	ID       string `bson:"_id,omitempty" json:"id,omitempty"`
 	Name     string `bson:"name" json:"name"`
 	Email    string `bson:"email" json:"email"`
 	Password string `bson:"password" json:"password"`
@@ -60,6 +60,21 @@ func (u *User) GetUser(id string) (*User, error) {
 
 	var user User
 	err = collection.FindOne(ctx, bson.M{"_id": docID}).Decode(&user)
+	if err != nil {
+		log.Println("Error while fetching user:", err)
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (u *User) GetUserByEmail(email string) (*User, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), mongoTimeout)
+	defer cancel()
+
+	collection := client.Database("users").Collection("users")
+	var user User
+	err := collection.FindOne(ctx, bson.M{"email": email}).Decode(&user)
 	if err != nil {
 		log.Println("Error while fetching user:", err)
 		return nil, err

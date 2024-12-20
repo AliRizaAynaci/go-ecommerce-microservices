@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"net/http"
 )
 
@@ -69,9 +70,25 @@ func (app *Config) handleUserRequest(w http.ResponseWriter, user UserPayload) {
 		return
 	}
 
+	// JSON response'dan gelen body'yi işleyelim
+	var responsePayload JsonResponse
+	err = json.NewDecoder(response.Body).Decode(&responsePayload)
+	if err != nil {
+		app.errorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	// Response'dan gelen user ID'yi almak
+	userID, ok := responsePayload.Data.(string)
+	if !ok {
+		app.errorJSON(w, errors.New("invalid response format"), http.StatusInternalServerError)
+		return
+	}
+
 	var payload JsonResponse
 	payload.Error = false
 	payload.Message = "User created successfully"
+	payload.Data = userID
 
 	app.writeJSON(w, http.StatusCreated, payload)
 }
