@@ -48,5 +48,5 @@ func main() {
 }
 
 /*
-	mongodb://admin:password@localhost:64001/logs?authSource=admin&readPreference=primary&appname=MongDB%20Compass&&directConnection=true&ssl=false
+mongodb://admin:password@localhost:64001/logs?authSource=admin&readPreference=primary&appname=MongDB%20Compass&&directConnection=true&ssl=false
 */

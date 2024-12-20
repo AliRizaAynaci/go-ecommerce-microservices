@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 	"user-service/internal/model"
 )
@@ -12,17 +13,14 @@ type JSONPayload struct {
 }
 
 func (app *Config) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
-	// read the json into var
-	var requestPayload struct {
-		Name     string `json:"name"`
-		Email    string `json:"email"`
-		Password string `json:"password"`
-	}
+	var requestPayload JSONPayload
 	err := app.readJSON(w, r, &requestPayload)
 	if err != nil {
 		app.errorJSON(w, err, http.StatusBadRequest)
 		return
 	}
+
+	log.Printf("Request payload: %+v\n", requestPayload)
 
 	// insert data
 	user := model.User{
@@ -31,6 +29,7 @@ func (app *Config) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 		Password: requestPayload.Password,
 	}
 
+	log.Printf("User: %+v\n", user)
 	err = app.Models.User.CreateUser(user)
 	if err != nil {
 		app.errorJSON(w, err, http.StatusInternalServerError)

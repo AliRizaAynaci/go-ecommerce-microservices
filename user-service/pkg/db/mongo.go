@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	mongoURL = "mongodb://mongo:64001"
+	mongoURL = "mongodb://mongo:27017"
 	username = "admin"
 	password = "password"
 )
